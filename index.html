@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Monte o funil de vendas do seu escritório de arquitetura e baixe em PDF.">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Funil do Arquiteto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: prancha técnica. Formulário em passos à esquerda; funil ao vivo, desenhado com cotas, à direita. */
+:root {
+  --bg: #EEF1F5;
+  --paper: #FFFFFF;
+  --ink: #131A24;
+  --ink-2: #4A5666;
+  --line: #CBD3DE;
+  --grid: #E1E6ED;
+  --accent: #1F4FD8;
+  --on-accent: #FFFFFF;
+  --accent-soft: #E3EAFC;
+  --ok: #1B7F52;
+  --f-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --f-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1319; --paper: #161C25; --ink: #E8ECF2; --ink-2: #9AA6B6; --line: #2C3644; --grid: #19212B;
+    --accent: #7F9DFF; --on-accent: #0B1020; --accent-soft: #1D2640; --ok: #4CC38A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1319; --paper: #161C25; --ink: #E8ECF2; --ink-2: #9AA6B6; --line: #2C3644; --grid: #19212B;
+  --accent: #7F9DFF; --on-accent: #0B1020; --accent-soft: #1D2640; --ok: #4CC38A;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-block: 24px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+.mono { font-family: var(--f-mono); }
+.label { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+
+header.top { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: end; justify-content: space-between; }
+header.top h1 { font-size: clamp(28px, 5vw, 40px); line-height: 1.05; font-weight: 700; }
+header.top p { margin: 6px 0 0; color: var(--ink-2); max-width: 52ch; }
+.privacy { font-size: 12.5px; color: var(--ink-2); max-width: 34ch; border-left: 2px solid var(--accent); padding-left: 10px; }
+
+nav.steps { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+nav.steps button {
+  flex: 1 0 auto; min-width: 104px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 8px 12px; cursor: pointer; text-align: left; font: inherit;
+}
+nav.steps button .n { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); }
+nav.steps button .t { font-weight: 600; font-size: 14px; }
+nav.steps button[aria-current="step"] { border-color: var(--accent); box-shadow: inset 0 -3px 0 var(--accent); }
+nav.steps button[aria-current="step"] .n { color: var(--accent); }
+nav.steps button.done .n::after { content: " ✓"; color: var(--ok); }
+
+.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (min-width: 940px) { .grid { grid-template-columns: minmax(0, 1fr) minmax(0, 380px); } aside.preview { position: sticky; top: 16px; } }
+
+.panel { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: clamp(16px, 3vw, 28px); display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.panel h2 { font-size: clamp(22px, 3.4vw, 28px); font-weight: 700; }
+.panel .help { margin: 4px 0 0; color: var(--ink-2); }
+.field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.field > label, .field > .lbl { font-weight: 600; font-size: 14px; }
+.hint { font-size: 12.5px; color: var(--ink-2); margin: 0; }
+input[type=text], input[type=number], textarea, select {
+  width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 9px 11px; min-width: 0;
+}
+textarea { min-height: 84px; resize: vertical; }
+input:focus-visible, textarea:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+.big { background: var(--accent-soft); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 4px 16px; align-items: baseline; justify-content: space-between; }
+.big .v { font-family: var(--f-mono); font-size: clamp(24px, 4vw, 32px); font-weight: 500; font-variant-numeric: tabular-nums; }
+
+.stage { border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 12px; background: var(--paper); }
+.stage-head { display: flex; gap: 10px; align-items: center; }
+.stage-head .label { flex: none; }
+.stage-head input { font-weight: 600; }
+.rate { display: grid; grid-template-columns: minmax(0, 1fr) 84px; gap: 12px; align-items: center; }
+.rate input[type=range] { width: 100%; accent-color: var(--accent); }
+.need { font-size: 13.5px; color: var(--ink-2); }
+.need b { font-family: var(--f-mono); color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.btnrow { display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between; align-items: center; }
+button.btn { font: inherit; font-weight: 600; padding: 10px 18px; border-radius: 6px; border: 1px solid var(--line); background: var(--paper); color: var(--ink); cursor: pointer; }
+button.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+button.btn.ghost { border-style: dashed; }
+button.btn.small { padding: 6px 12px; font-size: 13px; font-weight: 500; }
+button.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+aside.preview { background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 18px; min-width: 0; }
+aside.preview h3 { font-size: 18px; margin: 4px 0 14px; }
+.fn { list-style: none; margin: 0; padding: 0; }
+.bar { margin: 0 auto; border-radius: 4px; padding: 9px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; color: var(--on-accent); min-height: 44px; }
+.bar .nm { font-weight: 600; font-size: 13.5px; line-height: 1.25; min-width: 0; overflow-wrap: anywhere; }
+.bar .ct { font-family: var(--f-mono); font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.dim { height: 30px; position: relative; display: grid; place-items: center; }
+.dim::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; border-left: 1px dashed var(--ink-2); }
+.dim span { position: relative; background: var(--paper); padding: 0 8px; font-family: var(--f-mono); font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.stats { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stats .v { font-family: var(--f-mono); font-size: 20px; font-variant-numeric: tabular-nums; }
+.stats .label { display: block; margin-bottom: 2px; }
+.note { font-size: 12px; color: var(--ink-2); margin: 12px 0 0; }
+
+.sum-sec { display: flex; flex-direction: column; gap: 4px; }
+.sum-sec p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.sum-sec .empty { color: var(--ink-2); }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; min-width: 760px; font-size: 13.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 11px; border-bottom: 1px solid var(--line); }
+th { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); background: var(--bg); }
+td.num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+#status { min-height: 1.4em; font-size: 13.5px; color: var(--ink-2); }
+.who { margin: -8px 0 12px; font-size: 13px; color: var(--ink-2); overflow-wrap: anywhere; }
+.pv { border: 1px dashed var(--line); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; min-width: 0; transition: background-color .2s, border-color .2s; }
+.pv.on { background: var(--accent-soft); border: 1px solid var(--accent); }
+.pv p { margin: 0; font-size: 13.5px; overflow-wrap: anywhere; }
+.pv .clamp { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.pv .ph { color: var(--ink-2); }
+.pchips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pchip { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper); }
+.pchip.main { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.mval { font-family: var(--f-mono); font-size: 15px; font-variant-numeric: tabular-nums; }
+.sd { margin: 5px auto 0; font-size: 12px; color: var(--ink-2); display: flex; flex-direction: column; gap: 2px; overflow-wrap: anywhere; }
+.sd b { font-family: var(--f-mono); font-weight: 500; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); }
+@media (min-width: 940px) { aside.preview { max-height: calc(100vh - 32px); overflow-y: auto; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="label">Workshop de funil de vendas</div>
+      <h1>Funil do Arquiteto</h1>
+      <p>Seis passos: público, canais, etapas, meta e ações. No final você baixa o PDF para usar no escritório.</p>
+    </div>
+    <div class="privacy">O que você escreve fica só neste aparelho. Nada é enviado para ninguém.</div>
+  </header>
+
+  <nav class="steps" id="steps" aria-label="Passos"></nav>
+
+  <div class="grid">
+    <section class="panel" id="panel" aria-live="polite"></section>
+    <aside class="preview" id="preview" aria-label="Seu funil"></aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+(function () {
+  var KEY = 'funil-arquiteto-v1';
+  var CHANNELS = ['Indicações', 'Parcerias', 'Orgânico (redes e conteúdo)', 'Outbound (prospecção ativa)', 'Eventos'];
+  var STEPS = [
+    { id: 'publico', label: 'Público' }, { id: 'canais', label: 'Canais' }, { id: 'etapas', label: 'Etapas' },
+    { id: 'meta', label: 'Meta' }, { id: 'acoes', label: 'Ações' }, { id: 'resumo', label: 'Resumo' }
+  ];
+  var DUE = { '': 'Sem prazo', 'semana': 'Esta semana', '30': 'Em 30 dias', '90': 'Em 90 dias' };
+
+  function defaults() {
+    return {
+      step: 0, office: '', owner: '', icp: '', pain: '', channels: [], extra: '', main: '', goal: 3, ticket: '', revenue: '',
+      stages: [
+        { name: 'Prospecção', goal: '', crit: '', rate: 30, action: '', due: '' },
+        { name: 'Qualificação', goal: '', crit: '', rate: 50, action: '', due: '' },
+        { name: 'Atendimento / Projeto / Orçamento', goal: '', crit: '', rate: 60, action: '', due: '' },
+        { name: 'Negociação', goal: '', crit: '', rate: 50, action: '', due: '' },
+        { name: 'Fechamento', goal: '', crit: '', rate: 100, action: '', due: '' }
+      ],
+      next: ''
+    };
+  }
+  var S = defaults();
+  var visited = {};
+  try {
+    var raw = localStorage.getItem(KEY);
+    if (raw) { var p = JSON.parse(raw); if (p && Array.isArray(p.stages) && p.stages.length >= 3) { S = Object.assign(defaults(), p); } }
+  } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var nf = new Intl.NumberFormat('pt-BR');
+  var brl = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+  function num(v) { var n = parseFloat(String(v).replace(',', '.')); return isFinite(n) ? n : 0; }
+
+  /* Cálculo de trás pra frente: cada etapa precisa receber (quem entra na seguinte / taxa). */
+  function calc() {
+    var n = S.stages.length, need = new Array(n), goal = Math.max(1, Math.round(num(S.goal)) || 1);
+    need[n - 1] = goal;
+    for (var i = n - 2; i >= 0; i--) {
+      var r = Math.min(100, Math.max(1, num(S.stages[i].rate))) / 100;
+      need[i] = Math.ceil(need[i + 1] / r - 1e-9);
+    }
+    return { need: need, goal: goal, top: need[0], overall: need[0] ? goal / need[0] : 0, revenue: goal * num(S.ticket) };
+  }
+  function channelsList() { var l = S.channels.slice(); if (S.extra.trim()) l.push(S.extra.trim()); return l; }
+
+  /* ---------- passos ---------- */
+  function head(i, title, help) {
+    return '<div><div class="label">Passo ' + (i + 1) + ' de ' + STEPS.length + '</div><h2>' + title + '</h2><p class="help">' + help + '</p></div>';
+  }
+  function nav(i) {
+    return '<div class="btnrow"><button class="btn" data-go="' + (i - 1) + '"' + (i === 0 ? ' disabled' : '') + '>Voltar</button>' +
+      (i < STEPS.length - 1 ? '<button class="btn primary" data-go="' + (i + 1) + '">Próximo passo</button>' : '') + '</div>';
+  }
+  function field(label, key, type, ph, hint) {
+    var id = 'f-' + key.replace(/\./g, '-');
+    var ctl = type === 'area'
+      ? '<textarea id="' + id + '" data-k="' + key + '" placeholder="' + esc(ph) + '">' + esc(get(key)) + '</textarea>'
+      : '<input id="' + id + '" type="text" data-k="' + key + '" value="' + esc(get(key)) + '" placeholder="' + esc(ph) + '">';
+    return '<div class="field"><label for="' + id + '">' + label + '</label>' + ctl + (hint ? '<p class="hint">' + hint + '</p>' : '') + '</div>';
+  }
+  function get(path) { return path.split('.').reduce(function (o, k) { return o == null ? '' : o[k]; }, S); }
+  function set(path, v) { var ks = path.split('.'), o = S; for (var i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
+
+  function stepPublico() {
+    return head(0, 'Para quem você vende?', 'Comece pelo cliente. Um funil só funciona quando você sabe quem deveria entrar nele.') +
+      '<div class="row2">' + field('Nome do escritório', 'office', 'text', 'Ex.: Studio Marina Arquitetura') + field('Seu nome', 'owner', 'text', 'Ex.: Marina Alves') + '</div>' +
+      field('Quem é seu cliente ideal?', 'icp', 'area', 'Ex.: casais de 30 a 45 anos, comprando o primeiro apartamento, que querem projeto completo e assinado.', 'Pense nos seus 5 melhores clientes. O que eles têm em comum? Observe poder de compra, urgência, autoridade para decidir e afinidade com o seu trabalho.') +
+      field('Que dores e objeções ele traz?', 'pain', 'area', 'Ex.: medo de estourar o orçamento, dúvida se vale contratar arquiteto, pressa para mudar.') + nav(0);
+  }
+  function stepCanais() {
+    var chips = CHANNELS.map(function (c) { return '<button type="button" class="chip" data-ch="' + esc(c) + '" aria-pressed="' + (S.channels.indexOf(c) > -1) + '">' + esc(c) + '</button>'; }).join('');
+    var opts = channelsList(), sel = '<option value="">Escolha</option>' + opts.map(function (c) { return '<option' + (S.main === c ? ' selected' : '') + '>' + esc(c) + '</option>'; }).join('');
+    return head(1, 'De onde vêm seus clientes?', 'Marque os canais que você usa hoje ou quer usar nos próximos meses.') +
+      '<div class="field"><span class="lbl">Canais de entrada</span><div class="chips">' + chips + '</div></div>' +
+      field('Outros canais', 'extra', 'text', 'Ex.: lojas parceiras, condomínios, grupo de síndicos') +
+      '<div class="field"><label for="f-main">Qual deles traz mais clientes fechados hoje?</label><select id="f-main" data-k="main">' + sel + '</select>' +
+      '<p class="hint">Canal bom não é o que traz mais contatos. É o que traz mais projetos fechados pelo menor esforço.</p></div>' + nav(1);
+  }
+  function stepEtapas() {
+    var n = S.stages.length;
+    var cards = S.stages.map(function (s, i) {
+      var k = 'stages.' + i + '.';
+      return '<div class="stage"><div class="stage-head"><span class="label">Etapa ' + (i + 1) + '</span><input type="text" data-k="' + k + 'name" value="' + esc(s.name) + '" aria-label="Nome da etapa">' +
+        (n > 3 ? '<button class="btn small" data-rm="' + i + '" aria-label="Remover etapa ' + (i + 1) + '">Remover</button>' : '') + '</div>' +
+        '<div class="row2">' + field('Objetivo da etapa', k + 'goal', 'text', 'O que precisa acontecer aqui?') + field('Critério para avançar', k + 'crit', 'text', 'Quando o cliente passa para a próxima?') + '</div></div>';
+    }).join('');
+    return head(2, 'Etapas do funil', 'Liste as etapas do seu processo comercial, da primeira conversa até o fechamento. Os nomes abaixo são sugestões da palestra: renomeie, adicione ou remova. As taxas de conversão ficam para o próximo passo.') +
+      cards + '<div class="btnrow"><button class="btn ghost" data-add="1"' + (n >= 7 ? ' disabled' : '') + '>Adicionar etapa</button><span class="hint">De 3 a 7 etapas</span></div>' + nav(2);
+  }
+  function stepMeta() {
+    var c = calc(), n = S.stages.length;
+    var rates = S.stages.map(function (s, i) {
+      var k = 'stages.' + i + '.', last = i === n - 1;
+      var ctl = last ? '<div class="need">Última etapa: aqui entram os clientes que fecham.</div>' :
+        '<div class="field"><span class="lbl">De cada 100 clientes nesta etapa, quantos avançam?</span><div class="rate"><input type="range" min="1" max="100" data-k="' + k + 'rate" value="' + esc(s.rate) + '" aria-label="Taxa de avanço em porcentagem"><input type="number" min="1" max="100" data-k="' + k + 'rate" value="' + esc(s.rate) + '" aria-label="Taxa de avanço"></div></div>';
+      return '<div class="stage"><div class="stage-head"><span class="label">Etapa ' + (i + 1) + '</span><strong>' + esc(s.name || 'Sem nome') + '</strong></div>' + ctl +
+        '<div class="need">Para bater a meta, precisam chegar aqui: <b data-need="' + i + '">' + nf.format(c.need[i]) + '</b></div></div>';
+    }).join('');
+    return head(3, 'Meta e taxas de conversão', 'Defina quanto quer fechar por mês e quantos clientes avançam em cada etapa. O funil calcula de trás pra frente quantos precisam entrar. Sem dados ainda? Use um número razoável e ajuste depois com o que acontece na prática.') +
+      '<div class="row2"><div class="field"><label for="f-goal">Projetos fechados por mês</label><input id="f-goal" type="number" min="1" step="1" inputmode="numeric" data-k="goal" value="' + esc(S.goal) + '"></div>' +
+      '<div class="field"><label for="f-ticket">Valor médio de um projeto (R$)</label><input id="f-ticket" type="number" min="0" step="100" inputmode="decimal" data-k="ticket" value="' + esc(S.ticket) + '" placeholder="Ex.: 25000"></div></div>' +
+      '<div class="field"><label for="f-rev">Faturamento geral do escritório por mês (R$)</label><input id="f-rev" type="number" min="0" step="1000" inputmode="decimal" data-k="revenue" value="' + esc(S.revenue) + '" placeholder="Ex.: 120000"><p class="hint">Tudo que o escritório fatura, não só o que vem deste funil.</p></div>' +
+      rates + nav(3);
+  }
+  function stepAcoes() {
+    var c = calc();
+    var cards = S.stages.map(function (s, i) {
+      var k = 'stages.' + i + '.', last = i === S.stages.length - 1;
+      var sel = Object.keys(DUE).map(function (v) { return '<option value="' + v + '"' + (s.due === v ? ' selected' : '') + '>' + DUE[v] + '</option>'; }).join('');
+      return '<div class="stage"><div class="stage-head"><span class="label">Etapa ' + (i + 1) + '</span><strong>' + esc(s.name || 'Sem nome') + '</strong></div>' +
+        '<div class="need">Entram <b data-need="' + i + '">' + nf.format(c.need[i]) + '</b>' + (last ? '' : ' e ' + esc(s.rate) + '% avançam') + '</div>' +
+        '<div class="row2"><div class="field" style="grid-column:1/-1"><label for="a' + i + '">O que você faz para essa etapa funcionar melhor?</label><textarea id="a' + i + '" data-k="' + k + 'action" placeholder="Ex.: responder em até 1 hora e enviar o portfólio no mesmo dia">' + esc(s.action) + '</textarea></div>' +
+        '<div class="field"><label for="d' + i + '">Prazo</label><select id="d' + i + '" data-k="' + k + 'due">' + sel + '</select></div></div></div>';
+    }).join('');
+    return head(4, 'O que você faz em cada etapa?', 'Uma ação concreta por etapa. Comece pelas etapas onde a taxa de avanço é mais baixa.') + cards +
+      field('Seu primeiro passo na segunda-feira', 'next', 'text', 'Ex.: ligar para os 5 últimos clientes e pedir indicação') + nav(4);
+  }
+  function stepResumo() {
+    var c = calc(), ch = channelsList();
+    function sec(t, v) { return '<div class="sum-sec"><span class="label">' + t + '</span>' + (v && String(v).trim() ? '<p>' + esc(v) + '</p>' : '<p class="empty">Em branco</p>') + '</div>'; }
+    var rows = S.stages.map(function (s, i) {
+      return '<tr><td><b>' + esc(s.name) + '</b></td><td>' + esc(s.goal || '-') + '</td><td>' + esc(s.crit || '-') + '</td><td class="num">' + (i === S.stages.length - 1 ? '-' : esc(s.rate) + '%') + '</td><td class="num">' + nf.format(c.need[i]) + '</td><td>' + esc(s.action || '-') + '</td><td>' + DUE[s.due || ''] + '</td></tr>';
+    }).join('');
+    return head(5, 'Seu funil está desenhado', 'Confira, volte em qualquer passo para ajustar e baixe o PDF quando estiver pronto.') +
+      '<div class="row2">' + sec('Escritório', [S.office, S.owner].filter(Boolean).join(' · ')) + sec('Cliente ideal', S.icp) + sec('Dores e objeções', S.pain) + sec('Canais de entrada', ch.join(', ') + (S.main ? '\nPrincipal: ' + S.main : '')) + '</div>' +
+      '<div class="big"><span class="label">Meta mensal</span><span class="v">' + nf.format(c.goal) + ' projetos' + (c.revenue ? ' · ' + brl.format(c.revenue) : '') + '</span></div>' +
+      '<div class="tablewrap"><table><thead><tr><th>Etapa</th><th>Objetivo</th><th>Critério</th><th>Taxa</th><th>Entrada</th><th>Ação</th><th>Prazo</th></tr></thead><tbody>' + rows + '</tbody></table></div>' +
+      sec('Faturamento geral do escritório', num(S.revenue) > 0 ? brl.format(num(S.revenue)) + ' por mês' + (c.revenue ? ' · o funil representa ' + Math.round(c.revenue / num(S.revenue) * 100) + '%' : '') : '') + sec('Primeiro passo', S.next) +
+      '<div class="btnrow"><button class="btn primary" id="pdf">Baixar PDF do meu funil</button><button class="btn small" id="reset">Começar outro funil</button></div><div id="status" role="status"></div>' + nav(5);
+  }
+  var RENDER = [stepPublico, stepCanais, stepEtapas, stepMeta, stepAcoes, stepResumo];
+
+  /* ---------- tela ---------- */
+  var $panel = document.getElementById('panel'), $prev = document.getElementById('preview'), $steps = document.getElementById('steps');
+  function renderSteps() {
+    $steps.innerHTML = STEPS.map(function (s, i) {
+      return '<button data-go="' + i + '"' + (i === S.step ? ' aria-current="step"' : '') + (visited[i] && i !== S.step ? ' class="done"' : '') + '><span class="n">0' + (i + 1) + '</span><span class="t">' + s.label + '</span></button>';
+    }).join('');
+  }
+  function renderPanel(scroll) {
+    $panel.innerHTML = RENDER[S.step]();
+    renderSteps(); refresh();
+    if (scroll) $steps.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }
+  function renderPreview() {
+    var c = calc(), n = S.stages.length, cur = STEPS[S.step].id, ch = channelsList();
+    function on(ids) { return ids.indexOf(cur) > -1 ? ' on' : ''; }
+    var who = [S.office, S.owner].filter(Boolean).join(' · ');
+    var h = '<div class="label">Prévia ao vivo</div><h3>Seu funil</h3>' + (who ? '<p class="who">' + esc(who) + '</p>' : '');
+    h += '<div class="pv' + on(['publico']) + '"><span class="label">Cliente ideal</span>' +
+      (S.icp.trim() ? '<p class="clamp">' + esc(S.icp) + '</p>' : '<p class="ph">Descreva seu cliente ideal no passo 1.</p>') + '</div>';
+    h += '<div class="pv' + on(['canais']) + '"><span class="label">Entram por</span>' +
+      (ch.length ? '<div class="pchips">' + ch.map(function (x) { return '<span class="pchip' + (x === S.main ? ' main' : '') + '">' + esc(x) + '</span>'; }).join('') + '</div>' : '<p class="ph">Escolha seus canais no passo 2.</p>') + '</div>';
+    h += '<div class="pv' + on(['etapas', 'meta', 'acoes']) + '"><ol class="fn">';
+    S.stages.forEach(function (s, i) {
+      var w = n > 1 ? 100 - 38 * i / (n - 1) : 100, mix = n > 1 ? 100 - 34 * i / (n - 1) : 100;
+      h += '<li><div class="bar" style="width:' + w.toFixed(1) + '%;background:color-mix(in srgb,var(--accent) ' + mix.toFixed(0) + '%,var(--paper))"><span class="nm">' + esc(s.name || 'Etapa ' + (i + 1)) + '</span><span class="ct">' + nf.format(c.need[i]) + '</span></div>';
+      var sd = '';
+      if (s.goal.trim()) sd += '<span><b>Objetivo</b> ' + esc(s.goal) + '</span>';
+      if (s.crit.trim()) sd += '<span><b>Avança quando</b> ' + esc(s.crit) + '</span>';
+      if (s.action.trim()) sd += '<span><b>Ação</b> ' + esc(s.action) + (s.due ? ' (' + esc(DUE[s.due]) + ')' : '') + '</span>';
+      if (sd) h += '<div class="sd" style="width:' + Math.max(w, 78).toFixed(1) + '%">' + sd + '</div>';
+      if (i < n - 1) h += '<div class="dim"><span>' + esc(Math.min(100, Math.max(1, num(s.rate)))) + '% avançam</span></div>';
+      h += '</li>';
+    });
+    h += '</ol></div>';
+    h += '<div class="pv' + on(['meta']) + '"><span class="label">Meta mensal</span><p class="mval">' + nf.format(c.goal) + (c.goal === 1 ? ' projeto fechado' : ' projetos fechados') + (c.revenue ? ' · ' + brl.format(c.revenue) : '') + '</p>' + (num(S.revenue) > 0 ? '<p class="hint">Faturamento geral: ' + brl.format(num(S.revenue)) + (c.revenue ? ' (funil = ' + Math.round(c.revenue / num(S.revenue) * 100) + '%)' : '') + '</p>' : '') + '</div>';
+    h += '<div class="stats"><div><span class="label">Entrada no topo</span><span class="v">' + nf.format(c.top) + '</span></div><div><span class="label">Conversão geral</span><span class="v">' + (c.overall * 100).toFixed(1).replace('.', ',') + '%</span></div></div>';
+    if (S.next.trim()) h += '<div class="pv" style="margin-top:12px"><span class="label">Primeiro passo</span><p>' + esc(S.next) + '</p></div>';
+    h += '<p class="note">Os números mostram quantos clientes precisam estar em cada etapa por mês para fechar ' + nf.format(c.goal) + (c.goal === 1 ? ' projeto.' : ' projetos.') + '</p>';
+    $prev.innerHTML = h;
+  }
+  function refresh() {
+    renderPreview();
+    var c = calc();
+    var rev = $panel.querySelector('[data-rev]'); if (rev) rev.textContent = c.revenue ? brl.format(c.revenue) : 'Informe o valor médio';
+    var sh = $panel.querySelector('[data-share]'); if (sh) { var tot = num(S.revenue); sh.textContent = tot > 0 && c.revenue > 0 ? 'O funil representa ' + Math.round(c.revenue / tot * 100) + '% do faturamento geral do escritório.' : ''; }
+    $panel.querySelectorAll('[data-need]').forEach(function (el) { el.textContent = nf.format(c.need[+el.getAttribute('data-need')]); });
+  }
+
+  /* ---------- eventos ---------- */
+  document.addEventListener('input', function (e) {
+    var t = e.target, k = t.getAttribute && t.getAttribute('data-k'); if (!k) return;
+    var v = t.value;
+    if (/rate$/.test(k)) { v = Math.min(100, Math.max(0, Math.round(num(v)))); document.querySelectorAll('[data-k="' + k + '"]').forEach(function (el) { if (el !== t) el.value = v; }); }
+    set(k, v); save(); refresh();
+  });
+  document.addEventListener('change', function (e) { if (e.target.id === 'f-main' || /due$/.test(e.target.getAttribute('data-k') || '')) { save(); } });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.hasAttribute('data-go')) { var to = +b.getAttribute('data-go'); if (to < 0 || to >= STEPS.length) return; visited[S.step] = true; S.step = to; save(); renderPanel(true); return; }
+    if (b.hasAttribute('data-ch')) { var c = b.getAttribute('data-ch'), ix = S.channels.indexOf(c); if (ix > -1) S.channels.splice(ix, 1); else S.channels.push(c); if (channelsList().indexOf(S.main) < 0) S.main = ''; save(); renderPanel(false); return; }
+    if (b.hasAttribute('data-add')) { if (S.stages.length < 7) { S.stages.splice(S.stages.length - 1, 0, { name: 'Nova etapa', goal: '', crit: '', rate: 50, action: '', due: '' }); save(); renderPanel(false); } return; }
+    if (b.hasAttribute('data-rm')) { if (S.stages.length > 3) { S.stages.splice(+b.getAttribute('data-rm'), 1); S.stages[S.stages.length - 1].rate = 100; save(); renderPanel(false); } return; }
+    if (b.id === 'pdf') { makePdf(); return; }
+    if (b.id === 'reset') {
+      if (b.getAttribute('data-armed')) { S = defaults(); visited = {}; save(); renderPanel(true); }
+      else { b.setAttribute('data-armed', '1'); b.textContent = 'Clique de novo para apagar tudo'; setTimeout(function () { if (b.isConnected) { b.removeAttribute('data-armed'); b.textContent = 'Começar outro funil'; } }, 4000); }
+    }
+  });
+
+  /* ---------- PDF ---------- */
+  function status(msg) { var el = document.getElementById('status'); if (el) el.textContent = msg; }
+  async function makePdf() {
+    if (!window.jspdf) { status('Não foi possível carregar o gerador de PDF. Recarregue a página.'); return; }
+    try {
+      var doc = buildPdf();
+      var name = 'funil-de-vendas' + (S.office ? '-' + S.office.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : '') + '.pdf';
+      doc.save(name);
+      status('PDF gerado. Procure o arquivo na pasta de downloads do seu aparelho.');
+    } catch (err) {
+      status(err && err.code === 'declined' ? 'Download cancelado.' : 'Não foi possível salvar o PDF. Tente de novo.');
+    }
+  }
+  function buildPdf() {
+    var jsPDF = window.jspdf.jsPDF, doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    var W = 297, M = 14, BLUE = [31, 79, 216], INK = [19, 26, 36], GRAY = [90, 102, 118], LINE = [203, 211, 222];
+    var c = calc(), n = S.stages.length, title = S.office || 'Meu funil de vendas';
+    function txt(s, x, y, w, size, o) {
+      o = o || {}; doc.setFont('helvetica', o.bold ? 'bold' : 'normal'); doc.setFontSize(size); doc.setTextColor.apply(doc, o.color || INK);
+      var lines = doc.splitTextToSize(String(s || ''), w); if (o.max && lines.length > o.max) { lines = lines.slice(0, o.max); lines[o.max - 1] = lines[o.max - 1].replace(/.{0,2}$/, '...'); }
+      doc.text(lines, x, y, o.align ? { align: o.align } : undefined); return lines.length * size * 0.3528 * 1.3;
+    }
+    function top(label) {
+      doc.setFont('courier', 'normal'); doc.setFontSize(8); doc.setTextColor.apply(doc, GRAY); doc.text(label, M, 12);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.setTextColor.apply(doc, INK); doc.text(doc.splitTextToSize(title, 200)[0], M, 23);
+      doc.setDrawColor.apply(doc, BLUE); doc.setLineWidth(0.7); doc.line(M, 28, W - M, 28);
+    }
+    function section(label, body, x, y, w, max) {
+      txt(label.toUpperCase(), x, y, w, 7.5, { bold: true, color: BLUE });
+      var h = txt(body && String(body).trim() ? body : '-', x, y + 5, w, 10, { max: max, color: body && String(body).trim() ? INK : GRAY });
+      return y + 5 + h + 5;
+    }
+    /* Prancha 1 */
+    top('PRANCHA 01  ·  FUNIL DE VENDAS');
+    var y = 38, lx = M, lw = 120;
+    y = section('Cliente ideal', S.icp, lx, y, lw, 6);
+    y = section('Dores e objeções', S.pain, lx, y, lw, 5);
+    var ch = channelsList();
+    y = section('Canais de entrada', (ch.join(', ') || '') + (S.main ? '\nPrincipal: ' + S.main : ''), lx, y, lw, 4);
+    txt('META MENSAL', lx, y, lw, 7.5, { bold: true, color: BLUE }); y += 5.5;
+    var meta = nf.format(c.goal) + (c.goal === 1 ? ' projeto fechado' : ' projetos fechados');
+    txt(meta, lx, y, lw, 12, { bold: true }); y += 6;
+    if (num(S.ticket)) { txt('Valor médio ' + brl.format(num(S.ticket)) + '   |   Faturamento alvo ' + brl.format(c.revenue), lx, y, lw, 9.5, { color: GRAY }); }
+    if (num(S.revenue) > 0) { txt('Faturamento geral do escritório ' + brl.format(num(S.revenue)) + ' por mês' + (c.revenue ? '  (funil = ' + Math.round(c.revenue / num(S.revenue) * 100) + '%)' : ''), lx, y + 6, lw, 9.5, { color: GRAY }); }
+    var fx = 150, fw = W - M - fx, cx = fx + fw / 2, fy = 38, avail = 134, gap = 7.5;
+    var bh = Math.min(17, (avail - (n - 1) * gap) / n);
+    doc.setFont('courier', 'normal'); doc.setFontSize(7.5); doc.setTextColor.apply(doc, GRAY); doc.text('FUNIL  (entrada por mês)', fx, fy - 3);
+    S.stages.forEach(function (s, i) {
+      var w = fw * (n > 1 ? 1 - 0.35 * i / (n - 1) : 1), t = n > 1 ? 0.3 * i / (n - 1) : 0, yy = fy + i * (bh + gap);
+      doc.setFillColor(Math.round(BLUE[0] + (255 - BLUE[0]) * t), Math.round(BLUE[1] + (255 - BLUE[1]) * t), Math.round(BLUE[2] + (255 - BLUE[2]) * t));
+      doc.roundedRect(cx - w / 2, yy, w, bh, 1.2, 1.2, 'F');
+      doc.setTextColor(255, 255, 255); doc.setFont('helvetica', 'bold'); doc.setFontSize(9);
+      doc.text(doc.splitTextToSize(s.name || 'Etapa ' + (i + 1), w - 30)[0], cx - w / 2 + 4, yy + bh / 2 + 1.2);
+      doc.setFont('courier', 'bold'); doc.setFontSize(11); doc.text(nf.format(c.need[i]), cx + w / 2 - 4, yy + bh / 2 + 1.5, { align: 'right' });
+      if (i < n - 1) {
+        var my = yy + bh + gap / 2; doc.setDrawColor.apply(doc, GRAY); doc.setLineWidth(0.2); doc.setLineDashPattern([0.8, 0.8], 0); doc.line(cx, yy + bh + 0.5, cx, yy + bh + gap - 0.5); doc.setLineDashPattern([], 0);
+        var lab = Math.min(100, Math.max(1, num(s.rate))) + '% avançam'; doc.setFont('courier', 'normal'); doc.setFontSize(7.5); var lw2 = doc.getTextWidth(lab) + 3;
+        doc.setFillColor(255, 255, 255); doc.rect(cx - lw2 / 2, my - 2.2, lw2, 4.4, 'F'); doc.setTextColor.apply(doc, GRAY); doc.text(lab, cx, my + 1, { align: 'center' });
+      }
+    });
+    doc.setFont('courier', 'normal'); doc.setFontSize(8); doc.setTextColor.apply(doc, GRAY);
+    doc.text('Entrada no topo: ' + nf.format(c.top) + '   |   Conversão geral: ' + (c.overall * 100).toFixed(1).replace('.', ',') + '%', fx, fy + avail + 8);
+    /* Prancha 2 */
+    doc.addPage(); top('PRANCHA 02  ·  ETAPAS, TAXAS E AÇÕES');
+    var cols = [['Etapa', 36], ['Objetivo', 50], ['Critério para avançar', 48], ['Taxa', 16], ['Entrada', 20], ['Ação', 70], ['Prazo', 29]];
+    var ty = 36;
+    function thead() {
+      doc.setFillColor.apply(doc, BLUE); doc.rect(M, ty, W - 2 * M, 7, 'F'); var x = M;
+      cols.forEach(function (cl) { doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(255, 255, 255); doc.text(cl[0], x + 2, ty + 4.7); x += cl[1]; }); ty += 7;
+    }
+    thead();
+    S.stages.forEach(function (s, i) {
+      var cells = [s.name, s.goal || '-', s.crit || '-', i === n - 1 ? '-' : Math.round(num(s.rate)) + '%', nf.format(c.need[i]), s.action || '-', DUE[s.due || '']];
+      doc.setFontSize(8.5); var hmax = 1; cells.forEach(function (t, k) { hmax = Math.max(hmax, doc.splitTextToSize(String(t), cols[k][1] - 4).length); });
+      var rh = hmax * 3.7 + 4.5;
+      if (ty + rh > 178) { doc.addPage(); top('PRANCHA 02  ·  CONTINUAÇÃO'); ty = 36; thead(); }
+      var x = M; cells.forEach(function (t, k) { txt(t, x + 2, ty + 5, cols[k][1] - 4, 8.5, { bold: k === 0, color: INK }); x += cols[k][1]; });
+      ty += rh; doc.setDrawColor.apply(doc, LINE); doc.setLineWidth(0.2); doc.line(M, ty, W - M, ty);
+    });
+    ty += 8; if (ty > 168) { doc.addPage(); top('PRANCHA 02  ·  CONTINUAÇÃO'); ty = 38; }
+    txt('PRIMEIRO PASSO NA SEGUNDA-FEIRA', M, ty, 160, 7.5, { bold: true, color: BLUE });
+    txt(S.next || '-', M, ty + 5.5, 200, 10.5, { max: 2, color: S.next ? INK : GRAY });
+    /* Carimbo */
+    var total = doc.getNumberOfPages(), date = new Date().toLocaleDateString('pt-BR');
+    for (var p = 1; p <= total; p++) {
+      doc.setPage(p); var bx = 190, by = 187, cw = [38, 27, 15, 14];
+      doc.setDrawColor.apply(doc, INK); doc.setLineWidth(0.4); doc.rect(bx, by, 93, 12);
+      var vals = [['ESCRITÓRIO', S.office || '-'], ['RESPONSÁVEL', S.owner || '-'], ['DATA', date], ['PRANCHA', '0' + p + '/0' + total]], xx = bx;
+      vals.forEach(function (v, k) {
+        if (k) { doc.setLineWidth(0.2); doc.line(xx, by, xx, by + 12); }
+        doc.setFont('courier', 'normal'); doc.setFontSize(5.5); doc.setTextColor.apply(doc, GRAY); doc.text(v[0], xx + 1.5, by + 3.6);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor.apply(doc, INK); doc.text(doc.splitTextToSize(v[1], cw[k] - 3)[0], xx + 1.5, by + 9); xx += cw[k];
+      });
+      doc.setFont('courier', 'normal'); doc.setFontSize(7); doc.setTextColor.apply(doc, GRAY); doc.text('Funil do Arquiteto  |  Workshop de funil de vendas', M, 197);
+    }
+    return doc;
+  }
+
+  S.step = Math.min(Math.max(+S.step || 0, 0), STEPS.length - 1);
+  renderPanel(false);
+})();
+</script>
+</body>
+</html>
